@@ -23,7 +23,6 @@ telnet
 tree
 wget
 libglu1-mesa
-libgl1-mesa-glx
 libxrender1
 libcanberra-gtk3-0
 libpci-dev

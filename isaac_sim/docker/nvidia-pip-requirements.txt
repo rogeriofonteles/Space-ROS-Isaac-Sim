@@ -2,3 +2,6 @@ isaacsim==4.1.0.0
 isaacsim-extscache-kit==4.1.0.0
 isaacsim-extscache-kit-sdk==4.1.0.0
 isaacsim-extscache-physics==4.1.0.0
+boto3>=1.28.0
+botocore>=1.31.2
+s3transfer>=0.6.0

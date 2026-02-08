@@ -21,7 +21,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 USER root
 
-COPY --link apt-requirements.txt /apt-requirements.txt
+COPY --link docker/apt-requirements.txt /apt-requirements.txt
 # hadolint ignore=SC2046
 RUN apt-get update && \
     apt-get install --no-install-recommends -y $(cat /apt-requirements.txt) && \
@@ -34,7 +34,7 @@ RUN apt-add-repository ppa:fish-shell/release-3 && \
       apt-get update && \
       apt-get install -y fish
 
-COPY --link ros-requirements.txt /ros-requirements.txt
+COPY --link docker/ros-requirements.txt /ros-requirements.txt
 # hadolint ignore=SC2046
 RUN apt-get update && \
     apt-get install --no-install-recommends -y $(cat /ros-requirements.txt) && \
@@ -46,7 +46,7 @@ RUN locale-gen en_US en_US.UTF-8 &&  update-locale LC_ALL=en_US.UTF-8 LANG=en_US
 ENV LANG=en_US.UTF-8
 
 # Install Isaac Sim
-COPY --link nvidia-pip-requirements.txt /requirements.txt
+COPY --link docker/nvidia-pip-requirements.txt /requirements.txt
 RUN pip install --timeout=600 --no-cache-dir -r /requirements.txt --extra-index-url https://pypi.nvidia.com && \
     rm /requirements.txt
 
@@ -74,7 +74,7 @@ RUN mkdir -p /usr/local/lib/python3.10/dist-packages/isaacsim/extscache/omni.gpu
 USER ${USERNAME}
 
 # Copy the dependency.repos
-COPY --chown=${USERNAME}:${USERNAME} dependency.repos /tmp/dependency.repos
+COPY --chown=${USERNAME}:${USERNAME} docker/dependency.repos /tmp/dependency.repos
 
 RUN /bin/bash -c "source /opt/ros/humble/setup.bash && \
     mkdir -p /home/$USERNAME/isaac_ws/src && \
@@ -89,6 +89,9 @@ RUN echo "source /opt/ros/humble/setup.bash" >> /home/"$USERNAME"/.bashrc && \
     echo "source /home/$USERNAME/isaac_ws/install/setup.bash" >> /home/"$USERNAME"/.bashrc && \
     echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> /home/"$USERNAME"/.bashrc
 
+# Copy obstacle course simulation
+COPY --chown=${USERNAME}:${USERNAME} obstacle_sim /home/${USERNAME}/obstacle_sim
+
 # Install Fisher package manager for fish
 RUN fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
 # Install bass to use bash commands in fish
@@ -102,5 +105,5 @@ RUN mkdir -p ~/.config/fish/conf.d ~/.config/fish/completions ~/.config/fish/fun
       sed -i '1s/status is-interactive; or return 1/if not status is-interactive\n    return 0\nend/' ~/.config/fish/conf.d/ros2.fish && \
       rm -rf /tmp/ros2.fish-main
 
-COPY --link entrypoint.sh /.entrypoint.sh
+COPY --link docker/entrypoint.sh /.entrypoint.sh
 ENTRYPOINT ["/.entrypoint.sh"]
